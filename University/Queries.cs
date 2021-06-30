@@ -7,8 +7,7 @@ namespace University
 {
     public static class Queries
     {
-        private const string ConnectionString =
-            @"Data Source=DESKTOP-PUQ06I7\SQLEXPRESS;Initial Catalog=university;Pooling=true;Integrated Security=SSPI";
+        private const string ConnectionString = @"Data Source=DESKTOP-PUQ06I7\SQLEXPRESS;Initial Catalog=university;Pooling=true;Integrated Security=SSPI";
 
         public static int InsertStudent(string name, int age)
         {
@@ -17,13 +16,14 @@ namespace University
                 connection.Open();
                 using (var cmd = connection.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO [dbo].[Student] (
-                                        [Name],
-                                        [Age])
-                                        VALUES (
-                                        @name,
-                                        @age)
-                                        SELECT SCOPE_IDENTITY()";
+                    cmd.CommandText = @"
+                        INSERT INTO [dbo].[Student] (
+                        [Name],
+                        [Age])
+                        VALUES (
+                        @name,
+                        @age)
+                        SELECT SCOPE_IDENTITY()";
 
                     cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
                     cmd.Parameters.Add("@age", SqlDbType.Int).Value = age;
@@ -40,11 +40,12 @@ namespace University
                 connection.Open();
                 using (var cmd = connection.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO [dbo].[Instructor] (
-                                        [Name])
-                                        VALUES (
-                                        @name)
-                                        SELECT SCOPE_IDENTITY()";
+                    cmd.CommandText = @"
+                        INSERT INTO [dbo].[Instructor] (
+                        [Name])
+                        VALUES (
+                        @name)
+                        SELECT SCOPE_IDENTITY()";
 
                     cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
 
@@ -60,42 +61,71 @@ namespace University
                 connection.Open();
                 using (var cmd = connection.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO [dbo].[Course] (
-                                        [Name],
-                                        [InstructorId],
-                                        [GroupName])
-                                        VALUES (
-                                        @name,
-                                        @instructorId,
-                                        @groupName)
-                                        SELECT SCOPE_IDENTITY()";
+                    if (groupName == null)
+                    {
+                        cmd.CommandText = @"
+                            INSERT INTO [dbo].[Course] (
+                            [Name],
+                            [InstructorId])
+                            VALUES (
+                            @name,
+                            @instructorId)
+                            SELECT SCOPE_IDENTITY()";
+                    }
+                    else
+                    {
+                        cmd.CommandText = @"
+                            INSERT INTO [dbo].[Course] (
+                            [Name],
+                            [InstructorId],
+                            [GroupName])
+                            VALUES (
+                            @name,
+                            @instructorId,
+                            @groupName)
+                            SELECT SCOPE_IDENTITY()";
+
+                        cmd.Parameters.Add("@groupName", SqlDbType.NVarChar).Value = groupName;
+                    }
 
                     cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
                     cmd.Parameters.Add("@instructorId", SqlDbType.Int).Value = instructorId;
-                    cmd.Parameters.Add("@groupName", SqlDbType.NVarChar).Value = groupName;
 
                     return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
         }
 
-        public static int InsertGroup(string name, int studentId = 1)
+        public static int InsertGroup(string name, int studentId = 0)
         {
             using (var connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 using (var cmd = connection.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO [dbo].[Group] (
-                                        [Name],
-                                        [StudentId])
-                                        VALUES (
-                                        @name,
-                                        @studentId)
-                                        SELECT SCOPE_IDENTITY()";
+                    if (studentId == 0)
+                    {
+                        cmd.CommandText = @"
+                            INSERT INTO [dbo].[Group] (
+                            [GroupName])
+                            VALUES (
+                            @name)
+                            SELECT SCOPE_IDENTITY()";
+                    }
+                    else
+                    {
+                        cmd.CommandText = @"
+                            INSERT INTO [dbo].[Group] (
+                            [GroupName],
+                            [StudentId])
+                            VALUES (
+                            @name,
+                            @studentId)
+                            SELECT SCOPE_IDENTITY()";
+                        cmd.Parameters.Add("@studentId", SqlDbType.Int).Value = studentId;
+                    }
 
                     cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
-                    cmd.Parameters.Add("@studentId", SqlDbType.Int).Value = studentId;
                     return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
@@ -110,18 +140,16 @@ namespace University
                 using (var cmd = connection.CreateCommand())
                 {
                     cmd.Connection = connection;
-                    cmd.CommandText = @"SELECT [Name]
-                                    FROM [dbo].[Group]
-                                    GROUP BY [Name]";
+                    cmd.CommandText = @"
+                        SELECT [GroupName]
+                        FROM [dbo].[Group]
+                        GROUP BY [GroupName]";
 
                     using (var reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            var group = new Group
-                            {
-                                GroupName = Convert.ToString(reader["Name"])
-                            };
+                            var group = new Group {GroupName = Convert.ToString(reader["GroupName"])};
                             groups.Add(group);
                         }
                     }
@@ -140,8 +168,9 @@ namespace University
                 using (var cmd = connection.CreateCommand())
                 {
                     cmd.Connection = connection;
-                    cmd.CommandText = @"SELECT [StudentId],[Name]
-                                    FROM [dbo].[Student]";
+                    cmd.CommandText = @"
+                        SELECT [StudentId],[Name]
+                        FROM [dbo].[Student]";
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -171,8 +200,9 @@ namespace University
                 using (var cmd = connection.CreateCommand())
                 {
                     cmd.Connection = connection;
-                    cmd.CommandText = @"SELECT [InstructorId],[Name]
-                                        FROM [dbo].[Instructor]";
+                    cmd.CommandText = @"
+                        SELECT [InstructorId],[Name]
+                        FROM [dbo].[Instructor]";
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -201,9 +231,10 @@ namespace University
                 using (var cmd = connection.CreateCommand())
                 {
                     cmd.Connection = connection;
-                    cmd.CommandText = @"SELECT [Name], [InstructorId]
-                                    FROM [dbo].[Course]
-                                    GROUP BY [Name], [InstructorId]";
+                    cmd.CommandText = @"
+                        SELECT [Name], [InstructorId]
+                        FROM [dbo].[Course]
+                        GROUP BY [Name], [InstructorId]";
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -233,9 +264,10 @@ namespace University
                 using (var cmd = connection.CreateCommand())
                 {
                     cmd.Connection = connection;
-                    cmd.CommandText = @"UPDATE [dbo].[Course]
-                                        SET [InstructorId] = @instructorId
-                                        WHERE [Name] = @courseName";
+                    cmd.CommandText = @"
+                        UPDATE [dbo].[Course]
+                        SET [InstructorId] = @instructorId
+                        WHERE [Name] = @courseName";
 
                     cmd.Parameters.Add("@instructorId", SqlDbType.Int).Value = instructorId;
                     cmd.Parameters.Add("@courseName", SqlDbType.NVarChar).Value = courseName;
@@ -243,6 +275,118 @@ namespace University
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+
+        //Get number of students per course
+        public static List<CourseWithStudents> SelectStudentsPerCourse()
+        {
+            var courses = new List<CourseWithStudents>();
+            using (var connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.Connection = connection;
+                    cmd.CommandText = @"
+                        SELECT [Course].[Name], COUNT([Group].StudentId) AS StudentsCount 
+                        FROM [Course]
+                        LEFT JOIN [Group] ON [Course].[GroupName] = [Group].[GroupName]
+                        GROUP BY [Course].[Name]
+                        ORDER BY StudentsCount DESC";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var course = new CourseWithStudents
+                            {
+                                Name = Convert.ToString(reader["Name"]),
+                                StudentsCount = Convert.ToInt32(reader["StudentsCount"] != DBNull.Value
+                                    ? reader["StudentsCount"]
+                                    : "0")
+                            };
+                            courses.Add(course);
+                        }
+                    }
+                }
+            }
+
+            return courses;
+        }
+
+        //Get students, instructors and courses quantity
+        public static List<int> GeneralReport()
+        {
+            var quantity = new List<int>();
+            using (var connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.Connection = connection;
+                    cmd.CommandText = @"
+                        SELECT COUNT([StudentId]) AS StudentsCount 
+                        FROM [Student]";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var studentsCount = Convert.ToInt32(reader["StudentsCount"] != DBNull.Value
+                                ? reader["StudentsCount"]
+                                : "0");
+
+                            quantity.Add(studentsCount);
+                        }
+                    }
+                }
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.Connection = connection;
+                    cmd.CommandText = @"
+                        SELECT COUNT([Instructor].[InstructorId]) AS InstructorCount 
+                        FROM [Instructor]";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var instructorCount = Convert.ToInt32(reader["InstructorCount"] != DBNull.Value
+                                ? reader["InstructorCount"]
+                                : "0");
+
+                            quantity.Add(instructorCount);
+                        }
+                    }
+                }
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.Connection = connection;
+                    cmd.CommandText = @"
+                        SELECT COUNT(CoursesNames.[Name]) AS CoursesCount 
+                        FROM (
+	                        SELECT [Name] 
+	                        FROM [Course]
+	                        GROUP BY [Name]
+                        ) AS CoursesNames";
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var coursesCount = Convert.ToInt32(reader["CoursesCount"] != DBNull.Value
+                                ? reader["CoursesCount"]
+                                : "0");
+
+                            quantity.Add(coursesCount);
+                        }
+                    }
+                }
+            }
+
+            return quantity;
         }
     }
 }

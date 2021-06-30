@@ -15,13 +15,18 @@ namespace University
                 {
                     switch (command)
                     {
+                        case "0":
+                            break;
+                        case "End":
+                            break;
                         case "AddStudent":
                             Console.WriteLine("Enter student name");
                             var studentName = Console.ReadLine();
                             CheckNameFormat(studentName);
                             Console.WriteLine("Enter student age");
                             var age = int.Parse(Console.ReadLine());
-                            if (age is < 0 or > 150) throw new FormatException("Age must be in the range (0, 150)");
+                            if (age is < 0 or > 150) 
+                                throw new FormatException("Age must be in the range (0, 150)");
 
                             Queries.InsertStudent(studentName, age);
                             break;
@@ -39,7 +44,8 @@ namespace University
 
                             Console.WriteLine("Available instructors");
                             var instructors = Queries.SelectInstructors();
-                            foreach (var i in instructors) Console.WriteLine($"{i.InstructorId} | {i.Name}");
+                            foreach (var i in instructors) 
+                                Console.WriteLine($"{i.InstructorId} | {i.Name}");
                             Console.WriteLine("Enter instructor id");
                             var instructorId = int.Parse(Console.ReadLine());
                             CheckId(instructorId, instructors.Count);
@@ -55,13 +61,15 @@ namespace University
                             break;
                         case "AddStudentToGroup":
                             Console.WriteLine("Available groups");
-                            foreach (var g in Queries.SelectGroups()) Console.WriteLine($"{g.GroupName}");
+                            foreach (var g in Queries.SelectGroups()) 
+                                Console.WriteLine($"{g.GroupName}");
                             Console.WriteLine("Enter group name");
                             var groupNameForStudent = Console.ReadLine();
 
                             Console.WriteLine("Available students");
                             var students = Queries.SelectStudents();
-                            foreach (var s in students) Console.WriteLine($"{s.StudentId} | {s.Name}");
+                            foreach (var s in students) 
+                                Console.WriteLine($"{s.StudentId} | {s.Name}");
                             Console.WriteLine("Enter student id");
                             var studentId = int.Parse(Console.ReadLine());
                             CheckId(studentId, students.Count);
@@ -71,7 +79,8 @@ namespace University
                         case "AddGroupToCourse":
                             Console.WriteLine("Available groups");
                             var gr = Queries.SelectGroups();
-                            foreach (var g in gr) Console.WriteLine($"{g.GroupName}");
+                            foreach (var g in gr) 
+                                Console.WriteLine($"{g.GroupName}");
                             Console.WriteLine("Enter group name");
                             var groupNameForCourse = Console.ReadLine();
                             if (gr.Find(x => x.GroupName == groupNameForCourse) == null)
@@ -79,11 +88,13 @@ namespace University
 
                             Console.WriteLine("Available courses");
                             var courses = Queries.SelectCourses();
-                            foreach (var c in courses) Console.WriteLine($"{c.Name}");
+                            foreach (var c in courses) 
+                                Console.WriteLine($"{c.Name}");
                             Console.WriteLine("Enter course name");
                             var courseNameForGroup = Console.ReadLine();
                             var courseItem = courses.Find(x => x.Name == courseNameForGroup);
-                            if (courseItem == null) throw new ArgumentNullException("This course does not exist");
+                            if (courseItem == null) 
+                                throw new ArgumentNullException("This course does not exist");
 
                             Queries.InsertCourse(courseNameForGroup, courseItem.InstructorId, groupNameForCourse);
                             break;
@@ -91,14 +102,16 @@ namespace University
                         case "EditInstructorOnCourse":
                             Console.WriteLine("Available instructors");
                             var instructorsForCourse = Queries.SelectInstructors();
-                            foreach (var i in instructorsForCourse) Console.WriteLine($"{i.InstructorId} | {i.Name}");
+                            foreach (var i in instructorsForCourse) 
+                                Console.WriteLine($"{i.InstructorId} | {i.Name}");
                             Console.WriteLine("Enter instructor id");
                             var instructorIdForCourse = int.Parse(Console.ReadLine());
                             CheckId(instructorIdForCourse, instructorsForCourse.Count);
 
                             Console.WriteLine("Available courses");
                             var coursesForInstructorsEdit = Queries.SelectCourses();
-                            foreach (var c in coursesForInstructorsEdit) Console.WriteLine($"{c.Name}");
+                            foreach (var c in coursesForInstructorsEdit) 
+                                Console.WriteLine($"{c.Name}");
                             Console.WriteLine("Enter course name");
                             var courseNameForInstructorsEdit = Console.ReadLine();
                             if (coursesForInstructorsEdit.Find(x => x.Name == courseNameForInstructorsEdit) == null)
@@ -107,16 +120,18 @@ namespace University
                             Queries.UpdateInstructorOnCourse(instructorIdForCourse, courseNameForInstructorsEdit);
                             break;
                         case "PrintCoursesReport":
+                            foreach (var course in Queries.SelectStudentsPerCourse())
+                                Console.WriteLine($"{course.Name} - {course.StudentsCount}");
                             break;
                         case "PrintGeneralReport":
+                            var quantity = Queries.GeneralReport();
+                            Console.WriteLine($"Number of students = {quantity[0]}");
+                            Console.WriteLine($"Number of instructors = {quantity[1]}");
+                            Console.WriteLine($"Number of courses = {quantity[2]}");
                             break;
                         case "Help":
                             UniversityHelp();
                             continue;
-                        case "0":
-                            break;
-                        case "End":
-                            break;
                         default:
                             Console.WriteLine("There is no such command");
                             continue;
