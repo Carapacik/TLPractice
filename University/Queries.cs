@@ -12,12 +12,11 @@ namespace University
 
         public void InsertStudent(string name, int age)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
             {
-                connection.Open();
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = @"
+                cmd.CommandText = @"
                         INSERT INTO [dbo].[Student] (
                             [Name],
                             [Age])
@@ -25,59 +24,53 @@ namespace University
                             @name,
                             @age)";
 
-                    cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
-                    cmd.Parameters.Add("@age", SqlDbType.Int).Value = age;
-                    cmd.ExecuteNonQuery();
-                }
+                cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
+                cmd.Parameters.Add("@age", SqlDbType.Int).Value = age;
+                cmd.ExecuteNonQuery();
             }
         }
 
         public void InsertGroup(string name)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
             {
-                connection.Open();
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = @"
+                cmd.CommandText = @"
                         INSERT INTO [dbo].[Group] (
                             [Name])
                         VALUES (
                             @name)";
 
-                    cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
-                    cmd.ExecuteNonQuery();
-                }
+                cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
+                cmd.ExecuteNonQuery();
             }
         }
 
         public void InsertInstructor(string name)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
             {
-                connection.Open();
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = @"
+                cmd.CommandText = @"
                         INSERT INTO [dbo].[Instructor] (
                             [Name])
                         VALUES (
                             @name)";
 
-                    cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
-                    cmd.ExecuteNonQuery();
-                }
+                cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
+                cmd.ExecuteNonQuery();
             }
         }
 
         public void InsertCourse(string name, int instructorId)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
             {
-                connection.Open();
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = @"
+                cmd.CommandText = @"
                         INSERT INTO [dbo].[Course] (
                             [Name],
                             [InstructorId])
@@ -85,271 +78,284 @@ namespace University
                             @name,
                             @instructorId)";
 
-                    cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
-                    cmd.Parameters.Add("@instructorId", SqlDbType.Int).Value = instructorId;
-                    cmd.ExecuteNonQuery();
-                }
+                cmd.Parameters.Add("@name", SqlDbType.NVarChar).Value = name;
+                cmd.Parameters.Add("@instructorId", SqlDbType.Int).Value = instructorId;
+                cmd.ExecuteNonQuery();
             }
         }
 
         public List<Instructor> SelectInstructors()
         {
             var instructors = new List<Instructor>();
-            using (var connection = new SqlConnection(ConnectionString))
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
             {
-                connection.Open();
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.Connection = connection;
-                    cmd.CommandText = @"
+                cmd.Connection = connection;
+                cmd.CommandText = @"
                         SELECT 
                             [InstructorId],
                             [Name]
                         FROM [dbo].[Instructor]";
 
-                    using (var reader = cmd.ExecuteReader())
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
                     {
-                        while (reader.Read())
+                        var instructor = new Instructor
                         {
-                            var instructor = new Instructor
-                            {
-                                InstructorId = Convert.ToInt32(reader["InstructorId"]),
-                                Name = Convert.ToString(reader["Name"])
-                            };
-                            instructors.Add(instructor);
-                        }
+                            InstructorId = Convert.ToInt32(reader["InstructorId"]),
+                            Name = Convert.ToString(reader["Name"])
+                        };
+                        instructors.Add(instructor);
                     }
                 }
             }
 
             return instructors;
         }
-        
-        // public static List<Group> SelectGroups()
-        // {
-        //     var groups = new List<Group>();
-        //     using (var connection = new SqlConnection(ConnectionString))
-        //     {
-        //         connection.Open();
-        //         using (var cmd = connection.CreateCommand())
-        //         {
-        //             cmd.Connection = connection;
-        //             cmd.CommandText = @"
-        //                 SELECT [GroupName]
-        //                 FROM [dbo].[Group]
-        //                 GROUP BY [GroupName]";
-        //
-        //             using (var reader = cmd.ExecuteReader())
-        //             {
-        //                 while (reader.Read())
-        //                 {
-        //                     var group = new Group {GroupName = Convert.ToString(reader["GroupName"])};
-        //                     groups.Add(group);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return groups;
-        // }
-        //
-        // public static List<Student> SelectStudents()
-        // {
-        //     var students = new List<Student>();
-        //     using (var connection = new SqlConnection(ConnectionString))
-        //     {
-        //         connection.Open();
-        //         using (var cmd = connection.CreateCommand())
-        //         {
-        //             cmd.Connection = connection;
-        //             cmd.CommandText = @"
-        //                 SELECT [StudentId],[Name]
-        //                 FROM [dbo].[Student]";
-        //
-        //             using (var reader = cmd.ExecuteReader())
-        //             {
-        //                 while (reader.Read())
-        //                 {
-        //                     var student = new Student
-        //                     {
-        //                         StudentId = Convert.ToInt32(reader["StudentId"]),
-        //                         Name = Convert.ToString(reader["Name"])
-        //                     };
-        //                     students.Add(student);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return students;
-        // }
-        //
-        //
-        // public static List<Course> SelectCourses()
-        // {
-        //     var courses = new List<Course>();
-        //     using (var connection = new SqlConnection(ConnectionString))
-        //     {
-        //         connection.Open();
-        //         using (var cmd = connection.CreateCommand())
-        //         {
-        //             cmd.Connection = connection;
-        //             cmd.CommandText = @"
-        //                 SELECT [Name], [InstructorId]
-        //                 FROM [dbo].[Course]
-        //                 GROUP BY [Name], [InstructorId]";
-        //
-        //             using (var reader = cmd.ExecuteReader())
-        //             {
-        //                 while (reader.Read())
-        //                 {
-        //                     var course = new Course
-        //                     {
-        //                         Name = Convert.ToString(reader["Name"]),
-        //                         InstructorId = Convert.ToInt32(reader["InstructorId"] != DBNull.Value
-        //                             ? reader["InstructorId"]
-        //                             : "0")
-        //                     };
-        //                     courses.Add(course);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return courses;
-        // }
-        //
-        // public static void UpdateInstructorOnCourse(int instructorId, string courseName)
-        // {
-        //     using (var connection = new SqlConnection(ConnectionString))
-        //     {
-        //         connection.Open();
-        //         using (var cmd = connection.CreateCommand())
-        //         {
-        //             cmd.Connection = connection;
-        //             cmd.CommandText = @"
-        //                 UPDATE [dbo].[Course]
-        //                 SET [InstructorId] = @instructorId
-        //                 WHERE [Name] = @courseName";
-        //
-        //             cmd.Parameters.Add("@instructorId", SqlDbType.Int).Value = instructorId;
-        //             cmd.Parameters.Add("@courseName", SqlDbType.NVarChar).Value = courseName;
-        //
-        //             cmd.ExecuteNonQuery();
-        //         }
-        //     }
-        // }
-        //
-        // //Get number of students per course
-        // public static List<CourseWithStudents> SelectStudentsPerCourse()
-        // {
-        //     var courses = new List<CourseWithStudents>();
-        //     using (var connection = new SqlConnection(ConnectionString))
-        //     {
-        //         connection.Open();
-        //         using (var cmd = connection.CreateCommand())
-        //         {
-        //             cmd.Connection = connection;
-        //             cmd.CommandText = @"
-        //                 SELECT [Course].[Name], COUNT([Group].StudentId) AS StudentsCount 
-        //                 FROM [Course]
-        //                 LEFT JOIN [Group] ON [Course].[GroupName] = [Group].[GroupName]
-        //                 GROUP BY [Course].[Name]
-        //                 ORDER BY StudentsCount DESC";
-        //
-        //             using (var reader = cmd.ExecuteReader())
-        //             {
-        //                 while (reader.Read())
-        //                 {
-        //                     var course = new CourseWithStudents
-        //                     {
-        //                         Name = Convert.ToString(reader["Name"]),
-        //                         StudentsCount = Convert.ToInt32(reader["StudentsCount"] != DBNull.Value
-        //                             ? reader["StudentsCount"]
-        //                             : "0")
-        //                     };
-        //                     courses.Add(course);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return courses;
-        // }
-        //
-        // //Get students, instructors and courses quantity
-        // public static List<int> GeneralReport()
-        // {
-        //     var quantity = new List<int>();
-        //     using (var connection = new SqlConnection(ConnectionString))
-        //     {
-        //         connection.Open();
-        //         using (var cmd = connection.CreateCommand())
-        //         {
-        //             cmd.Connection = connection;
-        //             cmd.CommandText = @"
-        //                 SELECT COUNT([StudentId]) AS StudentsCount 
-        //                 FROM [Student]";
-        //
-        //             using (var reader = cmd.ExecuteReader())
-        //             {
-        //                 while (reader.Read())
-        //                 {
-        //                     var studentsCount = Convert.ToInt32(reader["StudentsCount"] != DBNull.Value
-        //                         ? reader["StudentsCount"]
-        //                         : "0");
-        //
-        //                     quantity.Add(studentsCount);
-        //                 }
-        //             }
-        //         }
-        //
-        //         using (var cmd = connection.CreateCommand())
-        //         {
-        //             cmd.Connection = connection;
-        //             cmd.CommandText = @"
-        //                 SELECT COUNT([Instructor].[InstructorId]) AS InstructorCount 
-        //                 FROM [Instructor]";
-        //
-        //             using (var reader = cmd.ExecuteReader())
-        //             {
-        //                 while (reader.Read())
-        //                 {
-        //                     var instructorCount = Convert.ToInt32(reader["InstructorCount"] != DBNull.Value
-        //                         ? reader["InstructorCount"]
-        //                         : "0");
-        //
-        //                     quantity.Add(instructorCount);
-        //                 }
-        //             }
-        //         }
-        //
-        //         using (var cmd = connection.CreateCommand())
-        //         {
-        //             cmd.Connection = connection;
-        //             cmd.CommandText = @"
-        //                 SELECT COUNT(CoursesNames.[Name]) AS CoursesCount 
-        //                 FROM (
-        //                  SELECT [Name] 
-        //                  FROM [Course]
-        //                  GROUP BY [Name]
-        //                 ) AS CoursesNames";
-        //
-        //             using (var reader = cmd.ExecuteReader())
-        //             {
-        //                 while (reader.Read())
-        //                 {
-        //                     var coursesCount = Convert.ToInt32(reader["CoursesCount"] != DBNull.Value
-        //                         ? reader["CoursesCount"]
-        //                         : "0");
-        //
-        //                     quantity.Add(coursesCount);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //
-        //     return quantity;
-        // }
+
+        public List<Group> SelectGroups()
+        {
+            var groups = new List<Group>();
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.Connection = connection;
+                cmd.CommandText = @"
+                        SELECT 
+                            [GroupId],
+                            [Name]
+                        FROM [dbo].[Group]";
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var group = new Group
+                        {
+                            GroupId = Convert.ToInt32(reader["GroupId"]),
+                            Name = Convert.ToString(reader["Name"])
+                        };
+                        groups.Add(group);
+                    }
+                }
+            }
+
+            return groups;
+        }
+
+        public List<Student> SelectStudents()
+        {
+            var students = new List<Student>();
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.Connection = connection;
+                cmd.CommandText = @"
+                        SELECT 
+                            [StudentId],
+                            [Name],
+                            [GroupId]
+                        FROM [dbo].[Student]";
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var student = new Student
+                        {
+                            StudentId = Convert.ToInt32(reader["StudentId"]),
+                            Name = Convert.ToString(reader["Name"]),
+                            GroupId = Convert.ToInt32(reader["GroupId"] != DBNull.Value
+                                ? reader["GroupId"]
+                                : "0")
+                        };
+                        students.Add(student);
+                    }
+                }
+            }
+
+            return students;
+        }
+
+        public void UpdateStudentGroup(int groupId, int studentId)
+        {
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"
+                        UPDATE [dbo].[Student]
+                        SET [GroupId] = @groupId
+                        WHERE 
+                            [StudentId] = @studentId";
+
+                cmd.Parameters.Add("@groupId", SqlDbType.NVarChar).Value = groupId;
+                cmd.Parameters.Add("@studentId", SqlDbType.Int).Value = studentId;
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public IList<Course> SelectCourses()
+        {
+            var courses = new List<Course>();
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.Connection = connection;
+                cmd.CommandText = @"
+                        SELECT 
+                            [CourseId],
+                            [Name]
+                        FROM [dbo].[Course]";
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var course = new Course
+                        {
+                            CourseId = Convert.ToInt32(reader["CourseId"]),
+                            Name = Convert.ToString(reader["Name"])
+                        };
+                        courses.Add(course);
+                    }
+                }
+            }
+
+            return courses;
+        }
+
+        public void InsertCourseForGroup(int groupId, int courseId)
+        {
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"
+                        INSERT INTO [dbo].[CourseForGroup] (
+                            [GroupId],
+                            [CourseId])
+                        VALUES (
+                            @groupId,
+                            @courseId)";
+
+                cmd.Parameters.Add("@groupId", SqlDbType.Int).Value = groupId;
+                cmd.Parameters.Add("@courseId", SqlDbType.Int).Value = courseId;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void UpdateCourseInstructor(int courseId, int instructorId)
+        {
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"
+                        UPDATE [dbo].[Course]
+                        SET [InstructorId] = @instructorId
+                        WHERE 
+                            [CourseId] = @courseId";
+
+                cmd.Parameters.Add("@instructorId", SqlDbType.NVarChar).Value = instructorId;
+                cmd.Parameters.Add("@courseId", SqlDbType.Int).Value = courseId;
+
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public List<StudentsPerCourse> SelectStudentsPerCourse()
+        {
+            var courses = new List<StudentsPerCourse>();
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.Connection = connection;
+                cmd.CommandText = @"
+                    SELECT 
+                        [Course].[Name], 
+                        COUNT([Student].[StudentId]) AS StudentsCount
+                    FROM [Course]
+                    LEFT JOIN [CourseForGroup] ON 
+                        [Course].[CourseId] = [CourseForGroup].[CourseId]
+                    LEFT JOIN [Group] ON 
+                        [CourseForGroup].[GroupId] = [Group].[GroupId]
+                    LEFT JOIN [Student] ON 
+                        [Student].[GroupId] = [Group].[GroupId]
+                    GROUP BY 
+                        [Course].[Name]";
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var course = new StudentsPerCourse
+                        {
+                            StudentsCount = Convert.ToInt32(reader["StudentsCount"]),
+                            CourseName = Convert.ToString(reader["Name"])
+                        };
+                        courses.Add(course);
+                    }
+                }
+            }
+
+            return courses;
+        }
+
+        public List<int> GeneralReport()
+        {
+            var counts = new List<int>();
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.Connection = connection;
+                cmd.CommandText = @"
+                    SELECT 
+                        COUNT([CourseId]) AS CoursesCount, 
+                        B.InstructorsCount, 
+                        B.StudentsCount 
+                    FROM [Course]
+                    CROSS JOIN (
+                        SELECT 
+                            COUNT([StudentId]) AS StudentsCount, 
+                            A.InstructorsCount 
+                        FROM [Student]
+                        CROSS JOIN (
+                            SELECT 
+                                COUNT([InstructorId]) AS InstructorsCount 
+                            FROM [Instructor]) AS A
+                            GROUP BY A.[InstructorsCount]) AS B
+                        GROUP BY B.InstructorsCount, B.StudentsCount";
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        counts.Add(Convert.ToInt32(reader["CoursesCount"] != DBNull.Value
+                            ? reader["CoursesCount"]
+                            : "0"));
+                        ;
+                        counts.Add(Convert.ToInt32(reader["InstructorsCount"] != DBNull.Value
+                            ? reader["InstructorsCount"]
+                            : "0"));
+                        ;
+                        counts.Add(Convert.ToInt32(reader["StudentsCount"] != DBNull.Value
+                            ? reader["StudentsCount"]
+                            : "0"));
+                        ;
+                    }
+                }
+            }
+
+            return counts;
+        }
     }
 }

@@ -60,7 +60,8 @@ namespace University
             }
             else
             {
-                var item = _items.Where(i => string.Equals(i.Shortcut, command, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                var item = _items
+                    .Where(i => string.Equals(i.Shortcut, command, StringComparison.CurrentCultureIgnoreCase)).ToList();
                 if (!item.Any())
                 {
                     _textWriter.WriteLine("Unknown command");
@@ -68,7 +69,7 @@ namespace University
                 else
                 {
                     item.First().Command(command);
-                    _textWriter.WriteLine("Success\n\r");
+                    _textWriter.WriteLine("Success\n");
                 }
             }
         }
